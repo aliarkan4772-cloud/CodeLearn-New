@@ -18,10 +18,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Organize Files (Fix Missing Folders)
+      - name: Organize Files
         run: |
           mkdir -p app/src/main/java/com/codelearn/app/ui/screens
           mkdir -p app/src/main/java/com/codelearn/app/ui/theme
@@ -49,7 +46,7 @@ jobs:
           mv ic_launcher_*.xml app/src/main/res/mipmap-anydpi-v26/
 
           mv AndroidManifest.xml app/src/main/
-          
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
