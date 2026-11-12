@@ -18,19 +18,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Organize Files Automatically
-        run: |
-          mkdir -p app/src/main/java/com/codelearn/app/ui/screens
-          mkdir -p app/src/main/java/com/codelearn/app/ui/theme
-          mkdir -p app/src/main/java/com/codelearn/app/data/model
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/drawable
-          mkdir -p app/src/main/res/mipmap-anydpi-v26
-
-          find . -maxdepth 1 -name "*.kt" -exec mv {} app/src/main/java/com/codelearn/app/ \;
-          find . -maxdepth 1 -name "*.xml" -exec mv {} app/src/main/res/values/ \;
-          mv "build.gradle (7).kts" app/build.gradle.kts || true
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
