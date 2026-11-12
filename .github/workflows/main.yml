@@ -16,34 +16,48 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Prepare project structure
+      - name: Arrange project
         run: |
           set -e
-          mkdir -p app/src/main/java
           mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/xml
-          if [ -f AndroidManifest.xml ]; then mv AndroidManifest.xml app/src/main/AndroidManifest.xml; fi
+          mkdir -p app/src/main/res/drawable
+          mkdir -p app/src/main/res/mipmap-anydpi-v26
+          mkdir -p gradle/wrapper
+
+          mv "build.gradle (7).kts" app/build.gradle.kts
+          mv proguard-rules.pro app/proguard-rules.pro
+          mv AndroidManifest.xml app/src/main/AndroidManifest.xml
+          mv colors.xml strings.xml themes.xml app/src/main/res/values/
+          mv ic_launcher_foreground.xml app/src/main/res/drawable/
+          mv ic_launcher.xml app/src/main/res/mipmap-anydpi-v26/
+          mv ic_launcher_round.xml app/src/main/res/mipmap-anydpi-v26/
+          rm -f "ic_launcher (25).xml" "ic_launcher_round (26).xml"
+          mv libs.versions.toml gradle/libs.versions.toml
+          mv gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties
+
           for f in *.kt; do
             [ -e "$f" ] || continue
-            pkg=$(grep -m1 '^package ' "$f" | sed 's/package //; s/[;\r]//g' | tr -d ' ' | tr '.' '/')
+            pkg=$(grep -m1 '^package ' "$f" | sed 's/^package //; s/[;\r]//g' | tr -d ' ' | tr '.' '/')
             if [ -z "$pkg" ]; then pkg="com/codelearn/app"; fi
             mkdir -p "app/src/main/java/$pkg"
             mv "$f" "app/src/main/java/$pkg/"
           done
-          printf 'pluginManagement {\n repositories { google(); mavenCentral(); gradlePluginPortal() }\n}\ndependencyResolutionManagement {\n repositories { google(); mavenCentral() }\n}\nrootProject.name = "CodeLearn"\ninclude(":app")\n' > settings.gradle.kts
-          printf 'plugins {\n id("com.android.application") version "8.5.2" apply false\n id("org.jetbrains.kotlin.android") version "2.0.20" apply false\n id("org.jetbrains.kotlin.plugin.compose") version "2.0.20" apply false\n}\n' > build.gradle.kts
-          printf 'org.gradle.jvmargs=-Xmx3072m -Dfile.encoding=UTF-8\nandroid.useAndroidX=true\nkotlin.code.style=official\nandroid.nonTransitiveRClass=true\n' > gradle.properties
-          printf 'plugins {\n id("com.android.application")\n id("org.jetbrains.kotlin.android")\n id("org.jetbrains.kotlin.plugin.compose")\n}\nandroid {\n namespace = "com.codelearn.app"\n compileSdk = 34\n defaultConfig {\n  applicationId = "com.codelearn.app"\n  minSdk = 26\n  targetSdk = 34\n  versionCode = 1\n  versionName = "1.0"\n }\n buildTypes {\n  release { isMinifyEnabled = false }\n }\n buildFeatures { compose = true }\n compileOptions {\n  sourceCompatibility = JavaVersion.VERSION_17\n  targetCompatibility = JavaVersion.VERSION_17\n }\n kotlinOptions { jvmTarget = "17" }\n packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }\n}\ndependencies {\n implementation(platform("androidx.compose:compose-bom:2024.09.02"))\n implementation("androidx.core:core-ktx:1.13.1")\n implementation("androidx.activity:activity-compose:1.9.2")\n implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")\n implementation("androidx.compose.ui:ui")\n implementation("androidx.compose.ui:ui-graphics")\n implementation("androidx.compose.ui:ui-tooling-preview")\n implementation("androidx.compose.material3:material3")\n implementation("androidx.compose.material:material-icons-extended")\n implementation("androidx.navigation:navigation-compose:2.8.1")\n debugImplementation("androidx.compose.ui:ui-tooling")\n}\n' > app/build.gradle.kts
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar" />\n</resources>\n' > app/src/main/res/values/themes.xml
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n <string name="app_name">CodeLearn</string>\n</resources>\n' > app/src/main/res/values/strings.xml
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<full-backup-content />\n' > app/src/main/res/xml/backup_rules.xml
-          printf '<?xml version="1.0" encoding="utf-8"?>\n<data-extraction-rules>\n <cloud-backup />\n</data-extraction-rules>\n' > app/src/main/res/xml/data_extraction_rules.xml
+
+          sed -i 's/\r$//' settings.gradle.kts build.gradle.kts gradle.properties app/build.gradle.kts
+          sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-bin.zip|' gradle/wrapper/gradle-wrapper.properties
+
+          echo "===== ROOT build.gradle.kts ====="
+          cat build.gradle.kts
+          echo "===== settings.gradle.kts ====="
+          cat settings.gradle.kts
+          echo "===== app/build.gradle.kts ====="
+          cat app/build.gradle.kts
+          echo "===== TREE ====="
+          find app -type f | sort
 
       - name: Build APK
         run: gradle assembleDebug --no-daemon --stacktrace
