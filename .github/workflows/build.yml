@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Organize Files
+      - name: Organize Files Automatically
         run: |
           mkdir -p app/src/main/java/com/codelearn/app/ui/screens
           mkdir -p app/src/main/java/com/codelearn/app/ui/theme
@@ -27,25 +27,9 @@ jobs:
           mkdir -p app/src/main/res/drawable
           mkdir -p app/src/main/res/mipmap-anydpi-v26
 
-          mv MainActivity.kt app/src/main/java/com/codelearn/app/
-          mv CodeLearnApp.kt app/src/main/java/com/codelearn/app/ui/
-          mv SplashScreen.kt app/src/main/java/com/codelearn/app/ui/screens/
-          mv LanguagePickerScreen.kt app/src/main/java/com/codelearn/app/ui/screens/
-          mv RoadmapScreen.kt app/src/main/java/com/codelearn/app/ui/screens/
-          mv Color.kt app/src/main/java/com/codelearn/app/ui/theme/
-          mv Type.kt app/src/main/java/com/codelearn/app/ui/theme/
-          mv Theme.kt app/src/main/java/com/codelearn/app/ui/theme/
-          mv Language.kt app/src/main/java/com/codelearn/app/data/model/
-
-          mv strings.xml app/src/main/res/values/
-          mv colors.xml app/src/main/res/values/
-          mv themes.xml app/src/main/res/values/
-          mv ic_launcher.xml app/src/main/res/drawable/
-          mv ic_launcher_foreground.xml app/src/main/res/drawable/
-          mv ic_launcher_round.xml app/src/main/res/drawable/
-          mv ic_launcher_*.xml app/src/main/res/mipmap-anydpi-v26/
-
-          mv AndroidManifest.xml app/src/main/
+          find . -maxdepth 1 -name "*.kt" -exec mv {} app/src/main/java/com/codelearn/app/ \;
+          find . -maxdepth 1 -name "*.xml" -exec mv {} app/src/main/res/values/ \;
+          mv "build.gradle (7).kts" app/build.gradle.kts || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
